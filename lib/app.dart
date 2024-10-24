@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ostad_ecommerce/controller.dart';
+import 'package:ostad_ecommerce/presentarion/ui/screens/bottom_nav_screen.dart';
 import 'package:ostad_ecommerce/presentarion/ui/screens/splash_screen.dart';
 import 'package:ostad_ecommerce/presentarion/ui/utils/app-colors.dart';
 
@@ -15,7 +17,9 @@ class _CraftyBayAppState extends State<CraftyBayApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home: const SplashScreen(),
+      debugShowCheckedModeBanner: false,
+      home: const ManinButtonNavScreen(),
+      initialBinding: ControllerBinder(),
       theme: ThemeData(
         colorSchemeSeed: AppColors.themeColor,
         scaffoldBackgroundColor: Colors.white,

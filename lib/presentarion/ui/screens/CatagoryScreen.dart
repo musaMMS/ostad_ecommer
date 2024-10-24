@@ -1,142 +1,67 @@
-
 import 'package:flutter/material.dart';
-import 'package:ostad_ecommerce/presentarion/ui/screens/home_screnn.dart';
-class CategoriesPage extends StatefulWidget {
-  @override
-  _CategoriesPageState createState() => _CategoriesPageState();
-}
+import 'package:get/get.dart';
+import 'package:ostad_ecommerce/presentarion/state_holder/bottom_nav_bar_controller.dart';
+import 'package:ostad_ecommerce/presentarion/state_holder/categoryList_controller.dart';
+import 'package:ostad_ecommerce/widgets/catagoryCard.dart';
+import 'package:ostad_ecommerce/widgets/centred_circulur_prograss_indecator.dart';
 
-class _CategoriesPageState extends State<CategoriesPage> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+class CategoryListScreen extends StatelessWidget {
+  const CategoryListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Categories'),
-        backgroundColor: Colors.teal,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GridView.count(
-          crossAxisCount: 4,
-          children: [
-            HomeScreen(),
-            Container(),
-            Container(),
-
-            CategoryTile(icon: Icons.tv, label: 'Electronics'),
-            CategoryTile(icon: Icons.local_dining, label: 'Food'),
-            CategoryTile(icon: Icons.diamond, label: 'Fashion'),
-            CategoryTile(icon: Icons.bed, label: 'Furniture'),
-            CategoryTile(icon: Icons.tv, label: 'Electronics'),
-            CategoryTile(icon: Icons.local_dining, label: 'Food'),
-            CategoryTile(icon: Icons.diamond, label: 'Fashion'),
-            CategoryTile(icon: Icons.bed, label: 'Furniture'),
-            CategoryTile(icon: Icons.tv, label: 'Electronics'),
-            CategoryTile(icon: Icons.local_dining, label: 'Food'),
-            CategoryTile(icon: Icons.diamond, label: 'Fashion'),
-            CategoryTile(icon: Icons.bed, label: 'Furniture'),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home,
-              color: Colors.grey,
-            ),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view,
-              color: Colors.grey,
-            ),
-            label: 'Categories',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket,
-              color: Colors.grey,
-            ),
-            label: 'Cart',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.card_giftcard,
-              color: Colors.grey,
-            ),
-            label: 'Wish',
-          ),
-
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.teal,
-        onTap: _onItemTapped,
-        elevation: 20,
-      ),
-    );
-  }
-}
-
-class CategoryTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  CategoryTile({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to a new screen when clicked
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CategoryDetailScreen(categoryName: label),
-          ),
-        );
+    return WillPopScope(
+      onWillPop: () async {
+        backToHome();
+        return false; // Prevent default back action
       },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 40.0,
-            color: Colors.teal,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Categories'),
+          leading: IconButton(
+            onPressed: backToHome,
+            icon: const Icon(Icons.arrow_back_ios),
           ),
-          SizedBox(height: 8.0),
-          Text(label, style: TextStyle(color: Colors.teal)),
-        ],
+        ),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await Get.find<CategoryListController>().getCategoryList();
+          },
+          child: GetBuilder<CategoryListController>(
+            builder: (categoryListController) {
+              if (categoryListController.inProgress) {
+                return const CentredCirculurPrograssIndecator(); // Loading state
+              } else if (categoryListController.errorMessage != null) {
+                return Center(
+                  child: Text(categoryListController.errorMessage!), // Error message
+                );
+              } else if (categoryListController.categoryList.isEmpty) {
+                return const Center(
+                  child: Text('No categories found.'), // Empty state
+                );
+              }
+
+              // Grid view of categories
+              return GridView.builder(
+                itemCount: categoryListController.categoryList.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.75,
+                ),
+                itemBuilder: (context, index) {
+                  return CatagoryCard(
+                    categoryModel: categoryListController.categoryList[index],
+                  );
+                },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
-}
 
-// New screen that shows when a category is clicked
-class CategoryDetailScreen extends StatelessWidget {
-  final String categoryName;
-
-  CategoryDetailScreen({required this.categoryName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('$categoryName Category'),
-        backgroundColor: Colors.teal,
-      ),
-      body: Center(
-        child: Text(
-          'Welcome to the $categoryName section!',
-          style: TextStyle(fontSize: 24.0),
-        ),
-      ),
-
-    );
+  void backToHome() {
+    Get.find<BottomNavBarController>().backToHome();
   }
 }

@@ -19,7 +19,7 @@ class SectionHeader extends StatelessWidget {
               ?.copyWith(fontWeight:FontWeight.w600) ,
         ),
         TextButton(onPressed: onTap,
-            child: Text('See all')),
+            child: Text('See all',)),
       ],
     );
   }

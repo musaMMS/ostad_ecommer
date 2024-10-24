@@ -54,6 +54,8 @@ dev_dependencies:
   http: ^1.2.2
   rich_text_controller: ^2.0.1
   carousel_slider: ^5.0.0
+  item_count_number_button: ^1.9.2
+  logger: ^2.4.0
 
 
 # For information on the generic Dart part of this file, see the
